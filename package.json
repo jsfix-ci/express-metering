@@ -1,0 +1,22 @@
+{
+  "name": "express-metering",
+  "version": "0.0.1",
+  "description": "simple middleware to meter api requests",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive --bail --reported spec  test/",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --recursive "
+  },
+  "author": "Selvam Palanimalai <selvam.palanimalai@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mongoose": "^4.8.1"
+  },
+  "devDependencies": {
+    "assert": "^1.4.1",
+    "express": "^4.14.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "supertest": "^3.0.0"
+  }
+}
