@@ -2,7 +2,10 @@
   "name": "express-metering",
   "version": "0.0.1",
   "description": "simple middleware to meter api requests",
+  "author": "Selvam Palanimalai <selvam.palanimalai@gmail.com>",
   "main": "index.js",
+  "repository":"chartotu19/express-metering",
+  "license":"MIT",
   "scripts": {
     "test": "mocha --recursive --bail --reported spec  test/",
     "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --recursive ",
@@ -10,6 +13,9 @@
   },
   "author": "Selvam Palanimalai <selvam.palanimalai@gmail.com>",
   "license": "MIT",
+  "engines":{
+	"node":">= 4.0"
+  },
   "dependencies": {
     "mongoose": "^4.8.1"
   },
