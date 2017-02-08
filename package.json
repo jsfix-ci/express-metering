@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --recursive --bail --reported spec  test/",
     "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --recursive ",
-	"test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --recursive test/"
+    "test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter spec --recursive test/"
   },
   "author": "Selvam Palanimalai <selvam.palanimalai@gmail.com>",
   "license": "MIT",
@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "assert": "^1.4.1",
+    "coveralls": "^2.11.16",
     "express": "^4.14.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
