@@ -1,6 +1,6 @@
 {
   "name": "express-metering",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "simple middleware to meter api requests",
   "author": "Selvam Palanimalai <selvam.palanimalai@gmail.com>",
   "main": "index.js",
