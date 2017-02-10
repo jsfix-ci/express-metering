@@ -3,6 +3,7 @@
 var Store = require('./lib/stores/Store');
 var memoryStore = require('./lib/stores/memory-store');
 var mongoStore = require('./lib/stores/mongo-store');
+var redisStore = require('./lib/stores/redis-store');
 
 var utils = require('./lib/utils');
 
@@ -120,3 +121,4 @@ exports.meter = meter;
 
 exports.mongoStore = mongoStore;
 exports.memoryStore = memoryStore;
+exports.redisStore = redisStore;
