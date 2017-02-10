@@ -9,6 +9,12 @@ This repository is available in [npm](https://npmjs.org) repository. It needs no
 ```
 $ npm install express-metering
 ```
+## Usecase
+This package is intended for a API service which servers single or multiple clients using express framework. It will meter(or measure)the requests made from a remote address per client_id per hour. `express-metering` will have a request throttling component very soon.
+* Requests throttling per client per hour for overall health of the service. (future planned release)
+* To identify malicious request origins which bombarding your service with requests. 
+* To identify and isolate key restful resources which are accessed more than others.
+
 ## Usage
 Each API request is stored in bucket uniquely identified by. 
 * `ip`- remote address
@@ -24,18 +30,14 @@ var metering = require('express-metering');
 app.use( metering.meter() );
 
 ```
-To use mongoStore instead of default memoryStore, use the following code. MongoStore persists data and protects metering info against server crashes. It unfortunately adds 1 DB access call which in turn adds ~100ms to your API call latency. 
+The middleware attaches the count/hour/client to the `req` object to be accessed down the middleware chain. To access the value downstream:
 ```javascript
-var app = express();
-var metering = require('express-metering');
-
-var store = new metering.mongoStore({
-  uri: "mongodb://user:password@1.2.3.4/db_name"
-});
-app.use( metering.meter({
-  store : store
-}) );
+console.log(req.meter.count); // contains an Integer count of number of requests for the client in the last utcHour.
 ```
+
+
+To use other stores instead of default memoryStore, scroll down to see `Stores` section. 
+
 
 ## Options
 name | Default | description
@@ -47,7 +49,35 @@ clientIdPath | "client.id" | The nested path in `req` object where client ID whe
 
 ## Stores
 
-Currently the package supports `memoryStore` and `mongoStore`. Support for the following stores is planned for near future releasese:
-* Redis
+Stores persist the request counts against each remote address(ip)/ hour. Currently this package supports :
+* **memoryStore**
+```javascript
+  var app = express();
+  var expressMetering = require('express-metering');
+  app.use( expressMetering.meter() );
+```
+
+* **mongoStore**
+MongoStore persists data and protects metering info against server crashes. It unfortunately adds 1 DB access call which in turn adds ~100ms to your API call latency. 
+```javascript
+  var app = express();
+  var expressMetering = require('express-metering');
+  var store = new expressMetering.mongoStore({
+    uri : "mongodb://username:password@mongo_server_ip/db_name"
+  });
+  app.use( expressMetering.meter({ store: store }) );
+```
+* **redisStore**
+```javascript
+  var app = express();
+  var expressMetering = require('express-metering');
+  var store = new expressMetering.redisStore({
+    host : "redis_url",
+    port : redis_port || 6379
+  });
+  app.use( expressMetering.meter({ store: store }) );
+```
+
+Support for the following stores is planned for near future releasese:
 * Memcached
 * Mysql
