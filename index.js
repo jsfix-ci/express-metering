@@ -5,8 +5,10 @@ var memoryStore = require('./lib/stores/memory-store');
 var mongoStore = require('./lib/stores/mongo-store');
 var redisStore = require('./lib/stores/redis-store');
 
-var utils = require('./lib/utils');
+var strategyFactory = require('./lib/strategy');
 
+var utils = require('./lib/utils');
+var errors = require('./lib/errors');
 var defaultOptions = require('./lib/default-options');
 
 var warning = function (msg) {
@@ -23,15 +25,7 @@ var meter = function (options){
 
     options = Object.assign({}, defaultOptions, options);
 
-    /*
-    var entry = {
-        utcHour : "",
-        increment: 1,
-        remoteAddress:"",
-        clientId: ""
-    };
-    */
-
+    //@todo : move store into strategy
     var store = options.store || new memoryStore({});
 
     if(!(store instanceof Store)){
@@ -45,75 +39,31 @@ var meter = function (options){
 
     return function handler (req,res,next) {
 
-        // get request information
-        var remoteAddress = req.connection.remoteAddress;
-
-        if(options.proxy && options.proxyForwardedHeader){
-            //check for default headers to avoid proxy header requests.
-            var forwardedAddress = req.headers[options.proxyForwardedHeader];
-            if(forwardedAddress == null){
-                warning('missing proxyForwardedHeader in the header of the request. check your proxy configuration');
+        var strategy = strategyFactory.get(options.strategy.type);
+        if(strategy == null){
+            throw new Error('invalid strategy type - '+options.strategy.type);
+        }
+        console.log(strategy);
+        return strategy(req, options, store)
+            .then(function (doc) {
+                if( options.debug ){
+                    console.log("result : "+ doc.count);
+                }
+                //set count to request object, for downstream middlewares to access it.
                 req.meter = {
-                    count : null
+                    count : doc.count
                 };
-                return next();
-            }
-            remoteAddress = forwardedAddress;
-        }
 
-        if(!remoteAddress){
-            warning("missing remoteAddress");
-            req.meter = {
-                count : null
-            };
-            return next();
-        }
-
-        // https://en.wikipedia.org/wiki/IPv6#IPv4-mapped_IPv6_addresses
-        remoteAddress = remoteAddress.replace(/^.*:/, '');
-
-
-        // extract clientId for the request.
-        var clientId = options.defaultClientId;
-        if( options.clientIdPath ){
-            clientId = utils.getDescendantProp(req,options.clientIdPath);
-        }
-
-        if(clientId == null || clientId == undefined){
-            throw new Error("invalid clientId found for the request - "+clientId);
-        }
-
-        return store.incr({
-            utcHour : utils.getUTCHourIndex(new Date()),
-            clientId : clientId,
-            increment: 1,
-            remoteAddress:remoteAddress
-        }).then(function (doc) {
-            if( options.debug ){
-                console.log("remoteAddress : "+remoteAddress);
-                console.log("result : "+ doc.count);
-            }
-            //set count to request object.
-            req.meter = {
-                count : doc.count
-            };
-            next();
-        }).catch(function (err) {
-            console.log(err);
-            next(err)
-        });
-
-        // //check for throttling
-        // var hourlyCount = store.get(remoteAddress,'hour');
-        // switch( options.bucketing){
-        //     case "hour":
-        //         break;
-        //
-        //     case "minute":
-        //         break;
-        // }
-
-        //forward request.
+                // request rate limiting
+                /*if( doc.count > options.requestsPerBucketSize){
+                    next(new errors.RateLimitingError());
+                } else {
+                    next();
+                }*/
+            }).catch(function (err) {
+                console.error(err);
+                next(err)
+            });
     }
 };
 
