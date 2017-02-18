@@ -55,11 +55,11 @@ var meter = function (options){
                 };
 
                 // request rate limiting
-                /*if( doc.count > options.requestsPerBucketSize){
+                if( doc.count > options.requestsPerBucketSize){
                     next(new errors.RateLimitingError());
                 } else {
                     next();
-                }*/
+                }
             }).catch(function (err) {
                 console.error(err);
                 next(err)

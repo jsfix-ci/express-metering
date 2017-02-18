@@ -9,7 +9,9 @@ app.use(function(req,res,next){
 });
 
 
-app.use(expressMeter.meter());
+app.use(expressMeter.meter({
+    requestsPerBucketSize:10
+}));
 
 app.get('/count',function (req, res, next) {
    return res.json({count : req.meter.count });
