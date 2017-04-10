@@ -4,24 +4,34 @@ var expressMeter = require('../index');
 var app = express();
 
 app.use(function(req,res,next){
-    req.accessToken = "testing"+Math.floor((Math.random() * 10) + 1);
+    req.customObj = {
+        accessToken: "accesstoken-" + Math.floor((Math.random() * 10) + 1)
+    };
     next();
 });
 
 
-app.use(expressMeter.meter({
+// app.enable('trust proxy');
+
+app.use(expressMeter({
+    strategy : {
+        type : "access-token",
+        paths : {
+            accessToken : "customObj.accessToken"
+        }
+    },
     requestsPerBucketSize:10
 }));
+
 
 app.get('/count',function (req, res, next) {
    return res.json({count : req.meter.count });
 });
 
 app.use(function (err,req,res,next) {
-    console.log(err.name);
     if( err.name == 'RateLimitingError'){
         return res.status(err.httpCode).json({
-           error : "Error : Too many requests sent from your client. Please try again after sometime"
+           error : "Too many requests sent from your client. Please try again after sometime"
         });
     }
     return next(err);
