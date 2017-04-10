@@ -1,7 +1,7 @@
 {
   "name": "express-metering",
   "version": "0.1.0",
-  "description": "simple middleware to meter api requests",
+  "description": "simple middleware to meter and throttle API requests",
   "author": "Selvam Palanimalai <selvam.palanimalai@gmail.com>",
   "main": "index.js",
   "repository": "chartotu19/express-metering",
