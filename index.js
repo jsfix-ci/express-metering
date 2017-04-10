@@ -1,9 +1,7 @@
 "use strict";
 
 var Store = require('./lib/stores/Store');
-var memoryStore = require('./lib/stores/memory-store');
-var mongoStore = require('./lib/stores/mongo-store');
-var redisStore = require('./lib/stores/redis-store');
+var storeFactory = require('./lib/stores');
 
 var strategyFactory = require('./lib/strategy');
 
@@ -11,11 +9,7 @@ var utils = require('./lib/utils');
 var errors = require('./lib/errors');
 var defaultOptions = require('./lib/default-options');
 
-var warning = function (msg) {
-    console.warn(msg);
-};
-
-var meter = function (options){
+module.exports = function (options){
 
     var options = options || {};
 
@@ -25,16 +19,21 @@ var meter = function (options){
 
     options = Object.assign({}, defaultOptions, options);
 
-    //@todo : move store into strategy
-    var store = options.store || new memoryStore({});
+    var store = storeFactory.get(options.store);
 
+    if(!utils.getDescendantProp(options,"store.type") ){
+        throw new Error("invalid store.type passed");
+    }
+    if( !utils.getDescendantProp(options,"strategy.type") ){
+        throw new Error("invalid strategy.type passed");
+    }
     if(!(store instanceof Store)){
-        throw new Error('invalid store instance passed');
+        throw new Error('invalid store type passed - '+options.store.type);
     }
 
     // warning message when running on production.
     if(process.env.NODE_ENV == 'production'){
-        warning("DONT use memoryStore in production, possible data loss");
+        console.log("DON'T use memoryStore in production, possible data loss.");
     }
 
     return function handler (req,res,next) {
@@ -43,12 +42,11 @@ var meter = function (options){
         if(strategy == null){
             throw new Error('invalid strategy type - '+options.strategy.type);
         }
-        console.log(strategy);
         return strategy(req, options, store)
             .then(function (doc) {
-                if( options.debug ){
-                    console.log("result : "+ doc.count);
-                }
+                //if( options.debug ){
+                //    console.log("result : "+ doc.count);
+                //}
                 //set count to request object, for downstream middlewares to access it.
                 req.meter = {
                     count : doc.count
@@ -66,9 +64,3 @@ var meter = function (options){
             });
     }
 };
-
-exports.meter = meter;
-
-exports.mongoStore = mongoStore;
-exports.memoryStore = memoryStore;
-exports.redisStore = redisStore;
