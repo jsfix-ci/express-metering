@@ -1,12 +1,12 @@
 pipeline {
   agent {
-    docker {
-      image 'test'
+    node {
+      label 'test'
     }
     
   }
   stages {
-    stage('') {
+    stage('error') {
       steps {
         parallel(
           "test1": {
@@ -15,6 +15,10 @@ pipeline {
           },
           "test2": {
             echo 'parallel2'
+            
+          },
+          "test3": {
+            build(job: 'test', propagate: true)
             
           }
         )
