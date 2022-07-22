@@ -17,7 +17,7 @@
   "dependencies": {
     "bluebird": "^3.4.7",
     "redis": "^2.6.5",
-    "mongoose": "^4.8.1"
+    "mongoose": "^5.13.14"
   },
   "devDependencies": {
     "assert": "^1.4.1",
